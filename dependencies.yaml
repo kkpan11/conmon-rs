@@ -1,7 +1,7 @@
 ---
 dependencies:
   - name: go
-    version: 1.22
+    version: 1.23
     refPaths:
       - path: go.mod
         match: go
@@ -18,14 +18,8 @@ dependencies:
       - path: .github/workflows/release.yml
         match: ACTION_MSRV_TOOLCHAIN
 
-  - name: rust (nightly)
-    version: nightly-2024-05-19
-    refPaths:
-      - path: .github/workflows/ci.yml
-        match: ACTION_MSRV_NIGHTLY_TOOLCHAIN
-
   - name: golangci-lint
-    version: 1.59.1
+    version: 1.60.3
     refPaths:
       - path: .github/workflows/ci.yml
         match: version

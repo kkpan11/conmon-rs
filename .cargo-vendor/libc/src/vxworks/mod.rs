@@ -91,6 +91,7 @@ pub type SEM_ID_KERNEL = ::OBJ_HANDLE;
 pub type RTP_ID = ::OBJ_HANDLE;
 pub type SD_ID = ::OBJ_HANDLE;
 pub type CONDVAR_ID = ::OBJ_HANDLE;
+pub type STATUS = ::OBJ_HANDLE;
 
 // From vxTypes.h
 pub type _Vx_usr_arg_t = isize;
@@ -613,6 +614,7 @@ pub const PTHREAD_STACK_MIN: usize = 4096;
 pub const _PTHREAD_SHARED_SEM_NAME_MAX: usize = 30;
 
 // ERRNO STUFF
+pub const ERROR: ::c_int = -1;
 pub const OK: ::c_int = 0;
 pub const EPERM: ::c_int = 1; /* Not owner */
 pub const ENOENT: ::c_int = 2; /* No such file or directory */
@@ -720,6 +722,33 @@ pub const S_nfsLib_NFSERR_SERVERFAULT: ::c_int = EIO;
 pub const S_nfsLib_NFSERR_BADTYPE: ::c_int = M_nfsStat | nfsstat::NFSERR_BADTYPE as ::c_int;
 pub const S_nfsLib_NFSERR_JUKEBOX: ::c_int = M_nfsStat | nfsstat::NFSERR_JUKEBOX as ::c_int;
 
+// internal offset values for below constants
+const taskErrorBase: ::c_int = 0x00030000;
+const semErrorBase: ::c_int = 0x00160000;
+const objErrorBase: ::c_int = 0x003d0000;
+
+// taskLibCommon.h
+pub const S_taskLib_NAME_NOT_FOUND: ::c_int = taskErrorBase + 0x0065;
+pub const S_taskLib_TASK_HOOK_TABLE_FULL: ::c_int = taskErrorBase + 0x0066;
+pub const S_taskLib_TASK_HOOK_NOT_FOUND: ::c_int = taskErrorBase + 0x0067;
+pub const S_taskLib_ILLEGAL_PRIORITY: ::c_int = taskErrorBase + 0x0068;
+
+// FIXME: could also be useful for TASK_DESC type
+pub const VX_TASK_NAME_LENGTH: ::c_int = 31;
+
+// semLibCommon.h
+pub const S_semLib_INVALID_STATE: ::c_int = semErrorBase + 0x0065;
+pub const S_semLib_INVALID_OPTION: ::c_int = semErrorBase + 0x0066;
+pub const S_semLib_INVALID_QUEUE_TYPE: ::c_int = semErrorBase + 0x0067;
+pub const S_semLib_INVALID_OPERATION: ::c_int = semErrorBase + 0x0068;
+
+// objLibCommon.h
+pub const S_objLib_OBJ_ID_ERROR: ::c_int = objErrorBase + 0x0001;
+pub const S_objLib_OBJ_UNAVAILABLE: ::c_int = objErrorBase + 0x0002;
+pub const S_objLib_OBJ_DELETED: ::c_int = objErrorBase + 0x0003;
+pub const S_objLib_OBJ_TIMEOUT: ::c_int = objErrorBase + 0x0004;
+pub const S_objLib_OBJ_NO_METHOD: ::c_int = objErrorBase + 0x0005;
+
 // in.h
 pub const IPPROTO_IP: ::c_int = 0;
 pub const IPPROTO_IPV6: ::c_int = 41;
@@ -753,6 +782,7 @@ pub const S_IFSOCK: ::c_int = 0xc000;
 pub const S_ISUID: ::c_int = 0x0800;
 pub const S_ISGID: ::c_int = 0x0400;
 pub const S_ISTXT: ::c_int = 0x0200;
+pub const S_ISVTX: ::c_int = 0o1000;
 pub const S_IRUSR: ::c_int = 0x0100;
 pub const S_IWUSR: ::c_int = 0x0080;
 pub const S_IXUSR: ::c_int = 0x0040;
@@ -768,6 +798,7 @@ pub const S_IRWXO: ::c_int = 0x0007;
 
 // socket.h
 pub const SOL_SOCKET: ::c_int = 0xffff;
+pub const SOMAXCONN: ::c_int = 128;
 
 pub const SO_DEBUG: ::c_int = 0x0001;
 pub const SO_REUSEADDR: ::c_int = 0x0004;
@@ -1782,6 +1813,10 @@ extern "C" {
     pub fn taskIdSelf() -> ::TASK_ID;
     pub fn taskDelay(ticks: ::_Vx_ticks_t) -> ::c_int;
 
+    // taskLib.h
+    pub fn taskNameSet(task_id: ::TASK_ID, task_name: *mut ::c_char) -> ::c_int;
+    pub fn taskNameGet(task_id: ::TASK_ID, buf_name: *mut ::c_char, bufsize: ::size_t) -> ::c_int;
+
     // rtpLibCommon.h
     pub fn rtpInfoGet(rtpId: ::RTP_ID, rtpStruct: *mut ::RTP_DESC) -> ::c_int;
     pub fn rtpSpawn(
@@ -1841,6 +1876,10 @@ extern "C" {
     ) -> ::c_int;
     pub fn mq_getattr(mqd: ::mqd_t, attr: *mut ::mq_attr) -> ::c_int;
     pub fn mq_setattr(mqd: ::mqd_t, newattr: *const ::mq_attr, oldattr: *mut ::mq_attr) -> ::c_int;
+
+    // vxCpuLib.h
+    fn vxCpuEnabledGet() -> ::cpuset_t; // Get set of running CPU's in the system
+    fn vxCpuConfiguredGet() -> ::cpuset_t; // Get set of Configured CPU's in the system
 }
 
 //Dummy functions, these don't really exist in VxWorks.
